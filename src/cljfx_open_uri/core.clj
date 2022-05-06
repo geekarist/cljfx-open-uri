@@ -5,13 +5,13 @@
 
 (def init {:mdl/iconified false})
 
-(defmulti updatef :evt/type)
+(defmulti upset :evt/type)
 
-(defmethod updatef :evt/log-btn-clicked
+(defmethod upset :evt/log-btn-clicked
   [_args]
   {:eff/log "Greetings!"})
 
-(defmethod updatef :default
+(defmethod upset :default
   [args]
   {:eff/log (str "Unknown event " (:evt/type args))})
 
@@ -42,7 +42,7 @@
   (atom (fx/create-context init cache/lru-cache-factory)))
 
 (def actual-handler
-  (-> updatef
+  (-> upset
       (fx/wrap-effects effects)))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}

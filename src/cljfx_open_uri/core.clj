@@ -21,22 +21,25 @@
 (def effects
   {:eff/log log!})
 
-(defn view [{:keys [fx/context]}]
-  (let [iconified? (fx/sub-val context :mdl/iconified)]
-    {:fx/type :stage
-     :showing true
-     :iconified iconified?
-     :scene
-     {:fx/type :scene
-      :root {:fx/type :v-box
-             :children [{:fx/type :text
-                         :text "Hello 🙂"}
-                        {:fx/type :button
-                         :text "Log greetings"
-                         :on-action {:evt/type :evt/log-btn-clicked}}
-                        {:fx/type :button
-                         :text "Do something unexpected"
-                         :on-action {:evt/type :evt/unexpected-btn-clicked}}]}}}))
+(defn view [state-map]
+  {:fx/type :stage
+   :showing true
+   :iconified (state-map :mdl/iconified)
+   :scene
+   {:fx/type :scene
+    :root {:fx/type :v-box
+           :children [{:fx/type :text
+                       :text "Hello 🙂"}
+                      {:fx/type :button
+                       :text "Log greetings"
+                       :on-action {:evt/type :evt/log-btn-clicked}}
+                      {:fx/type :button
+                       :text "Do something unexpected"
+                       :on-action {:evt/type :evt/unexpected-btn-clicked}}]}}})
+
+(defn view-context [{:keys [fx/context]}]
+  (let [state-map (fx/sub-val context identity)]
+    (view state-map)))
 
 (def *context
   (atom (fx/create-context init cache/lru-cache-factory)))
@@ -50,7 +53,7 @@
   (fx/create-app *context
                  :event-handler actual-handler
                  :desc-fn (fn [_]
-                            {:fx/type view})))
+                            {:fx/type view-context})))
 
 (defn raise-window! []
   (swap! *context fx/swap-context assoc :mdl/iconified true)

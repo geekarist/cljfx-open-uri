@@ -44,14 +44,11 @@
 (def *context
   (atom (fx/create-context init cache/lru-cache-factory)))
 
-(def actual-handler
-  (-> upset
-      (fx/wrap-effects effects)))
-
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def app
   (fx/create-app *context
-                 :event-handler actual-handler
+                 :event-handler upset
+                 :effects effects
                  :desc-fn (fn [_]
                             {:fx/type view-context})))
 

@@ -35,10 +35,10 @@
 (def effects
   {:eff/log log!})
 
-(defn view [state-map]
+(defn view [get-state]
   {:fx/type :stage
    :showing true
-   :iconified (state-map :mdl/iconified)
+   :iconified (get-state :mdl/iconified)
    :scene
    {:fx/type :scene
     :root {:fx/type :v-box
@@ -58,7 +58,7 @@
                        :text "Iconify window"
                        :on-action {:evt/type :evt/iconify-btn-clicked}}
                       {:fx/type :text
-                       :text (with-out-str (pprint state-map))}]}}})
+                       :text (with-out-str (pprint get-state))}]}}})
 
 ;; TODO: 99. separate `app` and `runtime` namespaces
 

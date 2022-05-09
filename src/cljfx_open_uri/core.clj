@@ -11,6 +11,11 @@
   [_args]
   {:eff/log "Greetings!"})
 
+(defmethod upset :evt/iconify-btn-clicked
+  [{:keys [fx/context] :as evt-arg-map}]
+  {:eff/log ["Iconify button clicked with args:" evt-arg-map]
+   :context (fx/swap-context context assoc :mdl/iconified true)})
+
 (defmethod upset :default
   [args]
   {:eff/log (str "Unknown event " (:evt/type args))})
@@ -38,7 +43,10 @@
                       ;; TODO: 3. implement 'Open URI' button
                       {:fx/type :button
                        :text "Do something unexpected"
-                       :on-action {:evt/type :evt/unexpected-btn-clicked}}]}}})
+                       :on-action {:evt/type :evt/unexpected-btn-clicked}}
+                      {:fx/type :button
+                       :text "Iconify window"
+                       :on-action {:evt/type :evt/iconify-btn-clicked}}]}}})
 
 ;; TODO: 99. separate `app` and `runtime` namespaces
 

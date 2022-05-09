@@ -1,9 +1,12 @@
 (ns cljfx-open-uri.core
   (:require [cljfx.api :as fx]
-            [clojure.core.cache :as cache])
+            [clojure.core.cache :as cache]
+            [clojure.pprint :refer [pprint]]
+            [clojure.edn :as edn])
   (:gen-class))
 
-(def init {:mdl/iconified false})
+(def init {:mdl/iconified false
+           :mdl/uri nil})
 
 (defmulti upset :evt/type)
 
@@ -15,6 +18,12 @@
   [{:keys [fx/context] :as evt-arg-map}]
   {:eff/log ["Iconify button clicked with args:" evt-arg-map]
    :context (fx/swap-context context assoc :mdl/iconified true)})
+
+(defmethod upset :evt/uri-value-changed
+  [{:keys [fx/context fx/event] :as _evt-arg-map}]
+  (let [text-str (-> event .getSource .getText)]
+    {:eff/log ["URI value changed with event:" event]
+     :context (fx/swap-context context assoc :mdl/uri text-str)}))
 
 (defmethod upset :default
   [args]
@@ -35,18 +44,21 @@
     :root {:fx/type :v-box
            :children [{:fx/type :text
                        :text "Hello 🙂"}
+                      {:fx/type :text-field
+                       :prompt-text "Provide an URI"
+                       :on-action {:evt/type :evt/uri-value-changed}}
                       {:fx/type :button
                        :text "Log greetings"
                        :on-action {:evt/type :evt/log-btn-clicked}}
-                      ;; TODO: 1. implement iconify button
-                      ;; TODO: 2. implement text input for URI
                       ;; TODO: 3. implement 'Open URI' button
                       {:fx/type :button
                        :text "Do something unexpected"
                        :on-action {:evt/type :evt/unexpected-btn-clicked}}
                       {:fx/type :button
                        :text "Iconify window"
-                       :on-action {:evt/type :evt/iconify-btn-clicked}}]}}})
+                       :on-action {:evt/type :evt/iconify-btn-clicked}}
+                      {:fx/type :text
+                       :text (with-out-str (pprint state-map))}]}}})
 
 ;; TODO: 99. separate `app` and `runtime` namespaces
 

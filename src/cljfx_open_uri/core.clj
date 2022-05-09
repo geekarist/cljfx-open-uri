@@ -33,10 +33,16 @@
                       {:fx/type :button
                        :text "Log greetings"
                        :on-action {:evt/type :evt/log-btn-clicked}}
+                      ;; TODO: 1. implement iconify button
+                      ;; TODO: 2. implement text input for URI
+                      ;; TODO: 3. implement 'Open URI' button
                       {:fx/type :button
                        :text "Do something unexpected"
                        :on-action {:evt/type :evt/unexpected-btn-clicked}}]}}})
 
+;; TODO: 99. separate `app` and `runtime` namespaces
+
+;; TODO: 99. generalize this function as `actual-view` or `wrap-pure-view`
 (defn view-context [{:keys [fx/context]}]
   (let [state-map (fx/sub-val context identity)]
     (view state-map)))

@@ -67,5 +67,14 @@
                             {:fx/type view-context})))
 
 (defn apply-changes! []
+  (println "Applying changes")
   (let [renderer (app :renderer)]
     (renderer)))
+
+#_{:clj-kondo/ignore [:redefined-var]}
+(defn- open-uri! [uri-str _dispatch]
+  (let [uri-obj (java.net.URI. (format "%s#hello-cljfx" uri-str))
+        desktop (java.awt.Desktop/getDesktop)]
+    (.browse desktop uri-obj)))
+
+(apply-changes!)

@@ -28,7 +28,7 @@
   (println arg))
 
 (defn- open-uri! [uri-str _dispatch]
-  (let [uri-obj (java.net.URI. (format "%s#hello" uri-str))
+  (let [uri-obj (java.net.URI. uri-str)
         desktop (java.awt.Desktop/getDesktop)]
     (.browse desktop uri-obj)))
 
@@ -47,6 +47,7 @@
                        :text "Hello 🙂"}
                       {:fx/type :text-field
                        :prompt-text "Provide an URI"
+                       :text (state-map :mdl/uri)
                        :on-text-changed {:evt/type :evt/uri-value-changed}}
                       {:fx/type :button :text "Open URI" :on-action {:evt/type :evt/open-uri-btn-clicked}}
                       {:fx/type :text
@@ -70,11 +71,5 @@
   (println "Applying changes")
   (let [renderer (app :renderer)]
     (renderer)))
-
-#_{:clj-kondo/ignore [:redefined-var]}
-(defn- open-uri! [uri-str _dispatch]
-  (let [uri-obj (java.net.URI. (format "%s#hello-cljfx" uri-str))
-        desktop (java.awt.Desktop/getDesktop)]
-    (.browse desktop uri-obj)))
 
 (apply-changes!)

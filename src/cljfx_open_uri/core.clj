@@ -33,8 +33,8 @@
     (.browse desktop uri-obj)))
 
 (def effects
-  {:eff/log log!
-   :eff/open-uri open-uri!})
+  {:eff/log #(log! %1 %2)
+   :eff/open-uri #(open-uri! %1 %2)})
 
 (defn view [state-map]
   {:fx/type :stage

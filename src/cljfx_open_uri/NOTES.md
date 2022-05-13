@@ -1,6 +1,8 @@
 ## How to reload an effect function in a running app?
 
-I'm using `create-app` to implement a simple application with side effects, but when I change an effect function, redefine it into the REPL, then re-render the app, it doesn't see the change.
+### Problem
+
+I'm using `create-app` to implement a simple application with side effects, but when I change an effect function, redefine it into the REPL, then re-render the app, it doesn't "see" the change.
 
 To illustrate this behaviour I have written a simple example:
 - See this repo: https://github.com/geekarist/cljfx-open-uri
@@ -16,3 +18,21 @@ To reproduce:
 - Click the 'Open URI' button
 - Expected: the browser opens your URI with a `#hello-cljfx` suffix
 - Result: it opens with a `#hello` suffix. That indicates that the effect function has not been reloaded.
+
+### Solution
+
+Instead of defining the effects map like this:
+
+```clojure
+(def effects
+  {:eff/log log!
+   :eff/open-uri open-uri!})
+```
+
+Define it like this:
+
+```clojure
+(def effects
+  {:eff/log #(log! %1 %2)
+   :eff/open-uri #(open-uri! %1 %2)})
+```

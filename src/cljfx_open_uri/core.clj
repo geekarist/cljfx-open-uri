@@ -1,29 +1,24 @@
 (ns cljfx-open-uri.core
   (:require [cljfx.api :as fx]
             [clojure.core.cache :as cache]
-            [clojure.pprint :refer [pprint]]
-            [clojure.edn :as edn])
+            [clojure.pprint :refer [pprint]])
   (:gen-class))
 
-(def init {:mdl/iconified false
-           :mdl/uri nil})
+(def init {:mdl/uri nil})
 
 (defmulti upset :evt/type)
 
-(defmethod upset :evt/log-btn-clicked
-  [_args]
-  {:eff/log "Greetings!"})
-
-(defmethod upset :evt/iconify-btn-clicked
-  [{:keys [fx/context] :as evt-arg-map}]
-  {:eff/log ["Iconify button clicked with args:" evt-arg-map]
-   :context (fx/swap-context context assoc :mdl/iconified true)})
-
 (defmethod upset :evt/uri-value-changed
   [{:keys [fx/context fx/event] :as _evt-arg-map}]
-  (let [text-str (-> event .getSource .getText)]
+  (let [text-str event]
     {:eff/log ["URI value changed with event:" event]
      :context (fx/swap-context context assoc :mdl/uri text-str)}))
+
+(defmethod upset :evt/open-uri-btn-clicked
+  [{:keys [fx/context] :as _evt-arg-map}]
+  (let [uri-str (fx/sub-val context :mdl/uri)]
+    {:eff/log (format "Opening URI: %s" uri-str)
+     :eff/open-uri uri-str}))
 
 (defmethod upset :default
   [args]
@@ -32,13 +27,19 @@
 (defn- log! [arg _dispatch!]
   (println arg))
 
-(def effects
-  {:eff/log log!})
+(defn- open-uri! [uri-str _dispatch]
+  (let [uri-obj (java.net.URI. (format "%s#hello" uri-str))
+        desktop (java.awt.Desktop/getDesktop)]
+    (.browse desktop uri-obj)))
 
-(defn view [get-state]
+(def effects
+  {:eff/log log!
+   :eff/open-uri open-uri!})
+
+(defn view [state-map]
   {:fx/type :stage
    :showing true
-   :iconified (get-state :mdl/iconified)
+   :iconified false
    :scene
    {:fx/type :scene
     :root {:fx/type :v-box
@@ -46,23 +47,11 @@
                        :text "Hello 🙂"}
                       {:fx/type :text-field
                        :prompt-text "Provide an URI"
-                       :on-action {:evt/type :evt/uri-value-changed}}
-                      {:fx/type :button
-                       :text "Log greetings"
-                       :on-action {:evt/type :evt/log-btn-clicked}}
-                      ;; TODO: 3. implement 'Open URI' button
-                      {:fx/type :button
-                       :text "Do something unexpected"
-                       :on-action {:evt/type :evt/unexpected-btn-clicked}}
-                      {:fx/type :button
-                       :text "Iconify window"
-                       :on-action {:evt/type :evt/iconify-btn-clicked}}
+                       :on-text-changed {:evt/type :evt/uri-value-changed}}
+                      {:fx/type :button :text "Open URI" :on-action {:evt/type :evt/open-uri-btn-clicked}}
                       {:fx/type :text
-                       :text (with-out-str (pprint get-state))}]}}})
+                       :text (with-out-str (pprint state-map))}]}}})
 
-;; TODO: 99. separate `app` and `runtime` namespaces
-
-;; TODO: 99. generalize this function as `actual-view` or `wrap-pure-view`
 (defn view-context [{:keys [fx/context]}]
   (let [state-map (fx/sub-val context identity)]
     (view state-map)))
@@ -70,7 +59,6 @@
 (def *context
   (atom (fx/create-context init cache/lru-cache-factory)))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def app
   (fx/create-app *context
                  :event-handler upset
@@ -78,11 +66,6 @@
                  :desc-fn (fn [_]
                             {:fx/type view-context})))
 
-(defn raise-window! []
-  (swap! *context fx/swap-context assoc :mdl/iconified true)
-  (future
-    (Thread/sleep 100)
-    (swap! *context fx/swap-context assoc :mdl/iconified false)))
-
-(comment
-  (raise-window!))
+(defn apply-changes! []
+  (let [renderer (app :renderer)]
+    (renderer)))

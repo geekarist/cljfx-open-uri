@@ -3,4 +3,4 @@
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn apply-changes! []
-  (cljfx-open-uri.core/raise-window!))
+  (cljfx-open-uri.core/apply-changes!))
